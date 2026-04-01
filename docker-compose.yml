@@ -7,11 +7,19 @@ x-airflow-common: &airflow-common
     AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
     AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
     AIRFLOW__API__AUTH_BACKENDS: 'airflow.api.auth.backend.basic_auth'
-    _PIP_ADDITIONAL_REQUIREMENTS: ''
+    _PIP_ADDITIONAL_REQUIREMENTS: 'requests python-dotenv pandas sqlalchemy psycopg2-binary'
+    OPENAQ_API_KEY: ${OPENAQ_API_KEY}
+    DB_HOST: postgres
+    DB_PORT: '5432'
+    DB_NAME: air_quality
+    DB_USER: pipeline_user
+    DB_PASSWORD: pipeline123
+    PYTHONPATH: /opt/airflow
   volumes:
     - ./dags:/opt/airflow/dags
     - ./logs:/opt/airflow/logs
     - ./plugins:/opt/airflow/plugins
+    - ./etl:/opt/airflow/etl
     - ./.env:/opt/airflow/.env
   depends_on:
     postgres:
