@@ -215,3 +215,6 @@ data/processed/
 
 # Airflow logs
 logs/
+
+
+.streamlit/secrets.toml

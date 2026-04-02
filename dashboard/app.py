@@ -137,6 +137,16 @@ hr {
 # --- Conexión DB ---
 @st.cache_resource
 def get_engine():
+    
+    try:
+        neon_url = st.secrets["NEON_DATABASE_URL"]
+    except Exception:
+        neon_url = os.getenv("NEON_DATABASE_URL")
+
+    if neon_url:
+        return create_engine(neon_url)
+
+    # Fallback a PostgreSQL local
     host     = os.getenv("DB_HOST", "localhost")
     port     = os.getenv("DB_PORT", "5432")
     db       = os.getenv("DB_NAME", "air_quality")
