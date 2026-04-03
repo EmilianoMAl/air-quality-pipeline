@@ -137,24 +137,27 @@ hr {
 # --- Conexión DB ---
 @st.cache_resource
 def get_engine():
-    
     try:
         neon_url = st.secrets["NEON_DATABASE_URL"]
     except Exception:
         neon_url = os.getenv("NEON_DATABASE_URL")
 
     if neon_url:
-        return create_engine(neon_url)
+        # pg8000 requiere formato diferente para SSL
+        url = neon_url.replace("postgresql://", "postgresql+pg8000://")
+        url = url.replace("?sslmode=require", "")
+        return create_engine(
+            url,
+            connect_args={"ssl_context": True}
+        )
 
-    # Fallback a PostgreSQL local
-    host     = os.getenv("DB_HOST", "localhost")
-    port     = os.getenv("DB_PORT", "5432")
-    db       = os.getenv("DB_NAME", "air_quality")
-    user     = os.getenv("DB_USER", "pipeline_user")
+    host = os.getenv("DB_HOST", "localhost")
+    port = os.getenv("DB_PORT", "5432")
+    db = os.getenv("DB_NAME", "air_quality")
+    user = os.getenv("DB_USER", "pipeline_user")
     password = os.getenv("DB_PASSWORD", "pipeline123")
     return create_engine(
-        f"postgresql+psycopg2://{user}:{password}@{host}:{port}/{db}",
-        pool_pre_ping=True
+        f"postgresql+pg8000://{user}:{password}@{host}:{port}/{db}"
     )
 
 
@@ -190,11 +193,13 @@ with st.sidebar:
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown('<div class="section-header">Filtros</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-header">Filtros</div>',
+                unsafe_allow_html=True)
 
     df = load_locations()
     localidades = ["Todas"] + sorted(df["locality"].dropna().unique().tolist())
-    selected_locality = st.selectbox("Localidad", localidades, label_visibility="collapsed")
+    selected_locality = st.selectbox(
+        "Localidad", localidades, label_visibility="collapsed")
 
     if selected_locality != "Todas":
         df_filtered = df[df["locality"] == selected_locality]
@@ -202,7 +207,8 @@ with st.sidebar:
         df_filtered = df.copy()
 
     st.markdown("---")
-    st.markdown('<div class="section-header">Pipeline Status</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-header">Pipeline Status</div>',
+                unsafe_allow_html=True)
 
     if not df.empty:
         last_update = pd.to_datetime(df["updated_at"]).max()
@@ -259,7 +265,8 @@ with col2:
 with col3:
     st.metric("Sensores en red", int(df["sensors_count"].sum()))
 with col4:
-    top_locality = df.groupby("locality")["sensors_count"].sum().idxmax() if not df.empty else "—"
+    top_locality = df.groupby("locality")[
+        "sensors_count"].sum().idxmax() if not df.empty else "—"
     st.metric("Mayor cobertura", top_locality)
 
 st.markdown("---")
@@ -268,7 +275,8 @@ st.markdown("---")
 col_map, col_table = st.columns([3, 2])
 
 with col_map:
-    st.markdown('<div class="section-header">Distribución Geográfica</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-header">Distribución Geográfica</div>',
+                unsafe_allow_html=True)
     if not df_filtered.empty:
         fig_map = px.scatter_mapbox(
             df_filtered,
@@ -278,7 +286,8 @@ with col_map:
             hover_data={"locality": True, "sensors_count": True,
                         "latitude": False, "longitude": False},
             color="sensors_count",
-            color_continuous_scale=[[0, "#0c2a4a"], [0.5, "#0284c7"], [1, "#38bdf8"]],
+            color_continuous_scale=[[0, "#0c2a4a"],
+                                    [0.5, "#0284c7"], [1, "#38bdf8"]],
             size="sensors_count",
             size_max=22,
             zoom=4,
@@ -296,7 +305,8 @@ with col_map:
         st.plotly_chart(fig_map, use_container_width=True)
 
 with col_table:
-    st.markdown('<div class="section-header">Detalle de Estaciones</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-header">Detalle de Estaciones</div>',
+                unsafe_allow_html=True)
     st.dataframe(
         df_filtered[["name", "locality", "sensors_count"]].rename(columns={
             "name": "Estación",
@@ -311,7 +321,8 @@ with col_table:
 st.markdown("---")
 
 # --- Gráfica barras ---
-st.markdown('<div class="section-header">Cobertura por Localidad</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-header">Cobertura por Localidad</div>',
+            unsafe_allow_html=True)
 
 df_grouped = (
     df_filtered
