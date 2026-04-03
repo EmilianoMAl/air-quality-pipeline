@@ -24,7 +24,7 @@ connected directly to the Neon PostgreSQL database.
 - 🥧 Coverage distribution by locality (pie chart)
 - 🔢 Total active stations (KPI card)
 
-![Power BI Dashboard](docs/power-bi-dashboard.png)
+![Power BI Dashboard](docs/power-bi-dashboard.PNG)
 ---
 
 ## 📐 Architecture
