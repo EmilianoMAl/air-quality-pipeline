@@ -13,6 +13,18 @@ and visualizes results in an interactive Streamlit dashboard.
 **🔗 [Live Dashboard](https://air-quality-pipeline.streamlit.app)** | 
 **📊 Data source:** [OpenAQ API](https://openaq.org)
 
+## 📊 Power BI Report
+
+In addition to the Streamlit dashboard, data is also visualized in Power BI
+connected directly to the Neon PostgreSQL database.
+
+**Visualizations:**
+- 🗺️ Station map with sensor density
+- 📊 Sensors by locality (bar chart)
+- 🥧 Coverage distribution by locality (pie chart)
+- 🔢 Total active stations (KPI card)
+
+![Power BI Dashboard](docs/power-bi-dashboard.png)
 ---
 
 ## 📐 Architecture
